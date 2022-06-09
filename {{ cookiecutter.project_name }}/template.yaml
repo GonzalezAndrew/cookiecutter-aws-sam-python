@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  python{{ cookiecutter.python_version }}
+
+  SAM Template for {{ cookiecutter.project_name }}
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function: # More info about Functions https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Timeout: 300
+    MemorySize: 512
+
+Parameters:
+  DockerTagVersion:
+    Type: String
+    Default: v0.0.1
+
+Resources:
+  {{ cookiecutter.lambda_name }}Function:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: {{ cookiecutter.lambda_name }}
+      Description: A function that is invoked by a CloudWatch Scheduled Event.
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: 'Allow'
+            Action:
+              - "lambda:InvokeFunction"
+      Events:
+        {{ cookiecutter.lambda_name }}:
+          Type: Schedule # More info about Scheduled Expressions: https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchevents-expressions.html  or https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#schedule
+          Properties:
+            Name: {{ cookiecutter.project_name }}-schedule
+            Description: Schedule event for the {{ cookiecutter.lambda_name }} lambda function.
+            Schedule: cron(0 18 ? * MON-FRI *) # Cron expression example - 6:00 PM Monday through Friday
+            Enabled: True
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./app
+      DockerTag: !Sub ${DockerTagVersion}
+
+Outputs:
+  {{ cookiecutter.lambda_name }}Function:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt {{ cookiecutter.lambda_name }}Function.Arn
+  {{ cookiecutter.lambda_name }}FunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt {{ cookiecutter.lambda_name }}FunctionRole.Arn

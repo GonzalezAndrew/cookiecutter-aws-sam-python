@@ -1,0 +1,7 @@
+{
+    "project_name": "hello_world",
+    "lambda_name": "HelloWorld",
+    "python_version": "3.9",
+    "author": "foo",
+    "email": "foo@fuzz.com"
+}
